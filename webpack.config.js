@@ -110,7 +110,7 @@ if (MODE_DEV_SERVER) {
   else {
     log.info('webpack', 'Check http://' + myLocalIp() + ':8080');
   }
-}
+} 
 else {
   // build mode
   log.info('webpackbuild', `rootdir: ${root}`);
@@ -125,6 +125,7 @@ else {
     });
   }
 }
+
 
 /** preloaders */
 
@@ -142,6 +143,27 @@ if (LINTER) {
 else {
   log.info('webpack', 'LINTER DISABLED');
 }
+
+
+/** loaders */
+
+const sassLoaders = extractSass.extract({
+  use: [{
+    loader: "css-loader",
+    query: JSON.stringify({
+      sourceMap: true
+    })
+  }, {
+    loader: "sass-loader",
+    query: JSON.stringify({
+      sourceMap: true
+    })
+  }],
+  // use style-loader in development
+  fallback: "style-loader"
+});
+
+const styleLoaders = (MODE_DEV_SERVER) ? ['css-hot-loader'].concat(sassLoaders) : sassLoaders;
 
 /** webpack config */
 
@@ -172,21 +194,7 @@ const config = {
       },
       {
         test: /\.(s)?css/,
-        use: extractSass.extract({
-          use: [{
-            loader: "css-loader",
-            query: JSON.stringify({
-              sourceMap: true
-            })
-          }, {
-            loader: "sass-loader",
-            query: JSON.stringify({
-              sourceMap: true
-            })
-          }],
-          // use style-loader in development
-          fallback: "style-loader"
-        })
+        use: styleLoaders
       },
       { test: /\.(png)$/, loader: 'url-loader?limit=' + ASSETS_LIMIT + '&name=assets/[hash].[ext]' },
       { test: /\.woff(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=' + ASSETS_LIMIT + '&mimetype=application/font-woff&name=assets/[hash].[ext]' },
